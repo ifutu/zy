@@ -1,0 +1,63 @@
+import numpy as np
+import pandas as pd
+
+
+class DaGouMan:
+
+    # def __init__(self,lujing):
+    #   self.banzuzhang = pd.read_excel(io=lujing, sheet_name="王邦兵"，header=0, usecols='A,C:AG')
+    def shaixuan(self, lujing):
+        # 加载路径
+        banzuzhang = pd.read_excel(io=lujing, sheet_name="王邦兵", header=0, usecols='A,C:AG')
+        # 提取数值
+        data = np.array(banzuzhang.values)
+        data = np.delete(data, [x for x in range(1, data.shape[0], 2)], axis=0)
+        # 将字符串转为变量
+        list_name = []
+        for date in range(1, 32):
+            list_name.append('ind{0}'.format(date))
+        # 提取带“√”的值
+        dic_name = {}
+        for i in list_name:
+            dic_name[i] = np.where(data[:, int("".join(list(filter(str.isdigit, i))))] == "√")
+        global T
+        T = []
+        for k_name in dic_name:
+            print("日期为{0}的已经统计的工人是：".format(k_name), data[dic_name[k_name], 0])
+            T.append(np.array(data[dic_name[k_name], 0][0]))
+            # print(T)
+        return T
+
+    def bijiao(self, written_lujing):
+        global W
+        written_lu = pd.read_excel(io=written_lujing, header=None)
+        W = np.array(written_lu.values)
+        # print(W)
+        return W
+
+    def jieguo(self):
+        lj = []
+        dj = []
+        for i in range(31):
+            louji = [y for y in (list(T[i]) + list(W[i])) if y not in T[i]]
+            duoji = [z for z in (list(T[i]) + list(W[i])) if z not in W[i]]
+
+            print('{0}================='.format(i))
+            print('漏记', louji)
+            print('多记', duoji)
+
+            lj += [louji]
+            dj += [duoji]
+        print(lj)
+        print(dj)
+        lj_df = pd.DataFrame(lj)
+        lj_df.to_excel(r"C:\Users\Administrator\Desktop\3月一带一路考勤\漏记.xls",
+                       index=False)
+        dj_df = pd.DataFrame(dj)
+        dj_df.to_excel(r"C:\Users\Administrator\Desktop\3月一带一路考勤\多记.xls",
+                       index=False)
+
+# bz = DaGouMan()
+# bz.shaixuan(r'C:\Users\Administrator\Desktop\3月一带一路考勤\班组所有.xls')
+# bz.bijiao(r'C:\Users\Administrator\Desktop\3月一带一路考勤\1号人员.xls')
+# bz.jieguo()
